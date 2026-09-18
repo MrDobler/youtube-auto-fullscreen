@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Auto Fullscreen",
+  "version": "0.1.0",
+  "description": "Base de desenvolvimento da extensão YouTube Auto Fullscreen.",
+  "minimum_chrome_version": "120",
+  "background": { "service_worker": "background/index.js", "type": "module" },
+  "action": {
+    "default_popup": "popup/index.html",
+    "default_title": "YouTube Auto Fullscreen"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://youtube.com/*", "https://www.youtube.com/*"],
+      "js": ["content/index.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'"
+  }
+}
