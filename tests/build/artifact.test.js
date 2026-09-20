@@ -81,6 +81,8 @@ async function digest() {
 test('clean repeated builds produce identical runtime-only artifacts', async () => {
   const first = await digest();
   assert.deepEqual(Object.keys(first).sort(), [
+    '_locales/en/messages.json',
+    '_locales/pt_BR/messages.json',
     'background/index.js',
     'content/index.js',
     'manifest.json',

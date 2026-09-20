@@ -1,0 +1,13 @@
+{
+  "title": { "message": "YouTube Auto Fullscreen" },
+  "preferenceLabel": { "message": "Automatic fullscreen" },
+  "toggleLabel": { "message": "Enable for videos and live streams" },
+  "enabled": { "message": "Enabled" },
+  "disabled": { "message": "Disabled" },
+  "loading": { "message": "Loading preference…" },
+  "saving": { "message": "Saving preference…" },
+  "loadError": {
+    "message": "Could not load the preference. Reopen the extension to try again."
+  },
+  "saveError": { "message": "The change was not confirmed. Try again." }
+}
