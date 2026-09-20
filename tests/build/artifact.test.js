@@ -18,6 +18,7 @@ test('MV3 artifact has consistent versions, least access and existing local reso
   const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
   assert.equal(manifest.manifest_version, 3);
   assert.equal(manifest.version, pkg.version);
+  assert.equal(manifest.default_locale, 'en');
   assert.equal(manifest.background.type, 'module');
   assert.equal(manifest.permissions, undefined);
   assert.equal(manifest.host_permissions, undefined);

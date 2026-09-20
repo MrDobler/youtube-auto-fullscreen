@@ -9,10 +9,10 @@ test.describe('extension bootstrap in controlled YouTube fixtures', () => {
     );
 
     const popup = await extension.openPopupPage();
-    await expect(popup.getByRole('status')).toHaveText('Base carregada.');
     await expect(popup.getByRole('heading', { level: 1 })).toHaveText(
       'YouTube Auto Fullscreen',
     );
+    await expect(popup.getByRole('checkbox')).toBeVisible();
 
     const page = await extension.openYouTube('direct');
     await extension.waitForPlayer(page, 'direct_video');
