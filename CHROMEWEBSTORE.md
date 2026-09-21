@@ -4,7 +4,7 @@ Atualizado em 21/09/2026. Estado: desenvolvimento S07; não pronto para submiss�
 
 ## Listing
 
-Nome: YouTube Auto Fullscreen. Versão local: 0.1.0. Descrição atual: base de desenvolvimento da extensão. Propósito planejado: abrir vídeos do YouTube automaticamente em tela cheia, respeitando saída manual e preferência global. A S07 integra o fluxo de vídeo direto, Esc e restauração de mudanças próprias. Descrição comercial, categoria, ícones e screenshots serão preparados após implementação e validação.
+Nome: YouTube Auto Fullscreen. Versão local: 0.1.1. Descrição atual: base de desenvolvimento da extensão. Propósito planejado: abrir vídeos do YouTube automaticamente em tela cheia, respeitando saída manual e preferência global. A S07 integra o fluxo de vídeo direto, Esc e restauração de mudanças próprias. Descrição comercial, categoria, ícones e screenshots serão preparados após implementação e validação.
 
 ## Permissões e acesso
 
@@ -22,6 +22,7 @@ Distribuição local para desenvolvimento. Política de privacidade definitiva, 
 
 | Versão | Entrega                                                 | Situação           |
 | ------ | ------------------------------------------------------- | ------------------ |
+| 0.1.1  | Correções de apresentação fullscreen e retomada entre vídeos | Local, não enviada |
 | 0.1.0  | Fundação, preferência, fluxo integrado e E2E controlado | Local, não enviada |
 
 ## Pendências
