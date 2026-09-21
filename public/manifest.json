@@ -5,6 +5,7 @@
   "default_locale": "en",
   "description": "Base de desenvolvimento da extensão YouTube Auto Fullscreen.",
   "minimum_chrome_version": "120",
+  "permissions": ["storage"],
   "background": { "service_worker": "background/index.js", "type": "module" },
   "action": {
     "default_popup": "popup/index.html",

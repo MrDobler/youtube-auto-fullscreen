@@ -20,7 +20,7 @@ test('MV3 artifact has consistent versions, least access and existing local reso
   assert.equal(manifest.version, pkg.version);
   assert.equal(manifest.default_locale, 'en');
   assert.equal(manifest.background.type, 'module');
-  assert.equal(manifest.permissions, undefined);
+  assert.deepEqual(manifest.permissions, ['storage']);
   assert.equal(manifest.host_permissions, undefined);
   assert.deepEqual(manifest.content_scripts[0].matches, [
     'https://youtube.com/*',
