@@ -8,26 +8,54 @@ const PLAYER_SELECTOR = '#movie_player, ytd-player';
 const VIDEO_SELECTOR =
   '#movie_player video.html5-main-video, ytd-player video.html5-main-video, video.html5-main-video';
 const ROOT_CLASS = 'ytaf-presentation-root';
+const ANCESTOR_CLASS = 'ytaf-presentation-ancestor';
 const PLAYER_CLASS = 'ytaf-presentation-player';
 const VIDEO_CLASS = 'ytaf-presentation-video';
 const STYLE_SELECTOR = 'style[data-ytaf-presentation-style="true"]';
 
 const PRESENTATION_CSS = `
-html.${ROOT_CLASS}, body.${ROOT_CLASS} { overflow: hidden !important; }
-.${PLAYER_CLASS} {
+html.${ROOT_CLASS}, body.${ROOT_CLASS} {
+  overflow: hidden !important;
+  background: #000 !important;
+}
+html.${ROOT_CLASS} body * { visibility: hidden !important; }
+html.${ROOT_CLASS} .${ANCESTOR_CLASS} {
+  transform: none !important;
+  filter: none !important;
+  perspective: none !important;
+  contain: none !important;
+  overflow: visible !important;
+  content-visibility: visible !important;
+}
+html.${ROOT_CLASS} .${PLAYER_CLASS},
+html.${ROOT_CLASS} .${PLAYER_CLASS} * { visibility: visible !important; }
+html.${ROOT_CLASS} .${PLAYER_CLASS} {
   position: fixed !important;
   inset: 0 !important;
-  z-index: 2147483646 !important;
+  z-index: 2147483647 !important;
   width: 100vw !important;
   height: 100vh !important;
   max-width: none !important;
   max-height: none !important;
+  margin: 0 !important;
+  background: #000 !important;
+  border-radius: 0 !important;
 }
-.${PLAYER_CLASS} .ytp-chrome-bottom,
-.${PLAYER_CLASS} .caption-window { z-index: 1; }
-.${VIDEO_CLASS} {
+html.${ROOT_CLASS} .${PLAYER_CLASS} .html5-video-container {
+  position: absolute !important;
+  inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
+}
+html.${ROOT_CLASS} .${PLAYER_CLASS} .ytp-chrome-bottom {
+  width: calc(100% - 24px) !important;
+  left: 12px !important;
+}
+html.${ROOT_CLASS} .${VIDEO_CLASS} {
+  width: 100% !important;
+  height: 100% !important;
+  left: 0 !important;
+  top: 0 !important;
   object-fit: contain !important;
 }
 `;
@@ -252,7 +280,7 @@ export function createYouTubePlayerController(dependencies) {
       (presentation.videoId !== resolved.snapshot.videoId ||
         presentation.player !== resolved.player)
     )
-      restore();
+      apply(resolved.snapshot.videoId);
     return resolved.snapshot;
   }
 
@@ -377,6 +405,12 @@ export function createYouTubePlayerController(dependencies) {
     try {
       addOwnedClass(document.documentElement, ROOT_CLASS);
       if (document.body !== null) addOwnedClass(document.body, ROOT_CLASS);
+      for (
+        let ancestor = resolved.player.parentElement;
+        ancestor !== null && ancestor !== document.documentElement;
+        ancestor = ancestor.parentElement
+      )
+        addOwnedClass(ancestor, ANCESTOR_CLASS);
       addOwnedClass(resolved.player, PLAYER_CLASS);
       addOwnedClass(resolved.video, VIDEO_CLASS);
       presentation = {

@@ -16,9 +16,8 @@ test.describe('extension bootstrap in controlled YouTube fixtures', () => {
 
     const page = await extension.openYouTube('direct');
     await extension.waitForPlayer(page, 'direct_video');
-    await expect(page.getByRole('heading')).toHaveText(
-      'Owned YouTube test page',
-    );
+    await expect(page.locator('h1')).toHaveText('Owned YouTube test page');
+    await expect(page.locator('h1')).toBeHidden();
     expect(extension.unexpectedRequests()).toEqual([]);
 
     const windows = await extension.windowState();
