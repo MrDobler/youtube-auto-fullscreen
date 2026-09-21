@@ -4,7 +4,7 @@ Updated on 2026-09-21. Status: local development; not ready for submission.
 
 ## Listing
 
-Name: YouTube Auto Fullscreen. Local version: 0.1.4. Current description: automatically opens eligible YouTube videos and live streams in fullscreen while respecting manual exit and the global preference. Store copy, category, icons, and screenshots remain to be prepared after manual platform validation.
+Name: YouTube Auto Fullscreen. Local version: 0.1.5. Current description: automatically opens eligible YouTube videos and live streams in fullscreen while respecting manual exit and the global preference. Store copy, category, icons, and screenshots remain to be prepared after manual platform validation.
 
 ## Permissions and access
 
@@ -20,13 +20,14 @@ Distribution is local for development. The final privacy policy, public URL, pub
 
 ## Version history
 
-| Version | Delivery                                                                 | Status               |
-| ------- | ------------------------------------------------------------------------ | -------------------- |
-| 0.1.4   | Hide recommendation overlays and restore presentation after page reload. | Local, not submitted |
-| 0.1.3   | English-only popup and removed unused locale assets.                     | Local, not submitted |
-| 0.1.2   | Immediate player recalculation for smoother presentation.                | Local, not submitted |
-| 0.1.1   | Fullscreen presentation and cross-video resumption fixes.                | Local, not submitted |
-| 0.1.0   | Foundation, preference, integrated flow, and controlled E2E.             | Local, not submitted |
+| Version | Delivery                                                                                              | Status               |
+| ------- | ----------------------------------------------------------------------------------------------------- | -------------------- |
+| 0.1.5   | Recover extension-owned presentation after worker wake and hide current recommendation card variants. | Local, not submitted |
+| 0.1.4   | Hide recommendation overlays and restore presentation after page reload.                              | Local, not submitted |
+| 0.1.3   | English-only popup and removed unused locale assets.                                                  | Local, not submitted |
+| 0.1.2   | Immediate player recalculation for smoother presentation.                                             | Local, not submitted |
+| 0.1.1   | Fullscreen presentation and cross-video resumption fixes.                                             | Local, not submitted |
+| 0.1.0   | Foundation, preference, integrated flow, and controlled E2E.                                          | Local, not submitted |
 
 ## Pending work
 

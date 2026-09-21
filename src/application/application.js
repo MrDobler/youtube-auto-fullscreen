@@ -89,6 +89,10 @@ export function createApplication(dependencies) {
           ? sessionResult.value
           : initial.session;
       state = { ...initial, preference, session };
+      for (const tab of Object.values(session.tabs)) {
+        if (tab.window?.changed === true)
+          ownedWindows.set(tab.window.windowId, tab.window);
+      }
       if (preferenceResult.ok && preferenceResult.value === null) {
         const written = await adapters.writePreference(preference);
         if (!written.ok) failures.push(written.error.message);
@@ -144,6 +148,7 @@ export function createApplication(dependencies) {
           tabId,
           operationId: effect.operationId,
           kind: 'window:enter-fullscreen',
+          windowChange: result.value,
         });
         return;
       }

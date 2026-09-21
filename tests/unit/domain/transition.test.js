@@ -323,6 +323,64 @@ test('reapplies the presentation after a document reload of the same video', () 
   expectValidEffects(reloaded.effects);
 });
 
+test('recovers an owned fullscreen presentation after a worker wake and document reload', () => {
+  const active = activeState().state;
+  const persisted = {
+    ...active,
+    runtime: {},
+    session: {
+      ...active.session,
+      tabs: {
+        ...active.session.tabs,
+        17: {
+          ...active.session.tabs['17'],
+          window: {
+            operationId: 'enter_01',
+            windowId: documentIdentity.windowId,
+            previousState: 'normal',
+            changed: true,
+          },
+        },
+      },
+    },
+  };
+  const withFullscreenContext = transition(persisted, {
+    type: 'context:updated',
+    tabId: 17,
+    context: context({
+      windowState: 'fullscreen',
+      fullscreenOwner: 'external',
+    }),
+  });
+  const recovered = transition(
+    withFullscreenContext.state,
+    player({
+      document: {
+        ...documentIdentity,
+        documentId: 'doc_after_reload',
+        navigationGeneration: 13,
+      },
+      operation: operation('present_after_wake'),
+    }),
+  );
+
+  expect(recovered.state.runtime['17']).toMatchObject({
+    phase: 'presenting',
+    ownsWindow: true,
+    video: { document: { documentId: 'doc_after_reload' } },
+  });
+  expect(recovered.effects.map((effect) => effect.kind)).toEqual([
+    'storage:write-session',
+    'content:send',
+  ]);
+  expect(
+    recovered.effects.some(
+      (effect) => effect.kind === 'window:enter-fullscreen',
+    ),
+  ).toBe(false);
+  expectValidEffects(recovered.effects);
+});
+
 test('ignores stale success, stale generation and repeated reports without effects', () => {
   const entering = transition(focusedState(), player());
   expect(

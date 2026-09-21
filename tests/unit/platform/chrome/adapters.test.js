@@ -293,6 +293,9 @@ test('rejects corrupt and failed session persistence', async () => {
 
 test('enters fullscreen without focusing and restores only its own change', async () => {
   const api = createChromeApi();
+  api.windows.get
+    .mockResolvedValueOnce({ id: 4, state: 'normal', focused: true })
+    .mockResolvedValueOnce({ id: 4, state: 'fullscreen', focused: true });
   const adapters = createChromeAdapters(api);
   const entered = await adapters.enterFullscreen(4, 'op_009');
 
@@ -311,6 +314,26 @@ test('enters fullscreen without focusing and restores only its own change', asyn
     value: { restored: true },
   });
   expect(api.windows.update).toHaveBeenLastCalledWith(4, { state: 'normal' });
+});
+
+test('restores a persisted owned change after the worker wakes', async () => {
+  const api = createChromeApi({
+    windows: {
+      get: vi.fn().mockResolvedValue({ id: 4, state: 'fullscreen' }),
+      update: vi.fn().mockResolvedValue({ id: 4, state: 'normal' }),
+    },
+  });
+  const adapters = createChromeAdapters(api);
+
+  await expect(
+    adapters.restoreOwnedWindow({
+      operationId: 'op_persisted_01',
+      windowId: 4,
+      previousState: 'normal',
+      changed: true,
+    }),
+  ).resolves.toEqual({ ok: true, value: { restored: true } });
+  expect(api.windows.update).toHaveBeenCalledWith(4, { state: 'normal' });
 });
 
 test('does not restore external fullscreen or an unowned change', async () => {

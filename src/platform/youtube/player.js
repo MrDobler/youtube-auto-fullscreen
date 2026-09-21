@@ -34,8 +34,17 @@ html.${ROOT_CLASS} .${PLAYER_CLASS} :is(
   .ytp-endscreen-content,
   .ytp-ce-element,
   .ytp-autonav-endscreen-upnext-container,
-  .ytp-autonav-endscreen-countdown-container
-) { visibility: hidden !important; }
+  .ytp-autonav-endscreen-countdown-container,
+  .ytp-videowall-still,
+  .ytp-related-on-error,
+  [class*="endscreen"],
+  [class*="autonav"],
+  [class*="pause-overlay"],
+  [class*="videowall"]
+) {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
 html.${ROOT_CLASS} .${PLAYER_CLASS} {
   position: fixed !important;
   inset: 0 !important;
@@ -459,6 +468,8 @@ export function createYouTubePlayerController(dependencies) {
 
   /** @param {boolean} [preserveResume] @returns {PresentationResult} */
   function restore(preserveResume = false) {
+    const changed =
+      classChanges.length > 0 || ownsPresentationStyle || presentation !== null;
     for (const change of classChanges) {
       if (!change.existed) change.element.classList.remove(change.className);
     }
@@ -469,7 +480,7 @@ export function createYouTubePlayerController(dependencies) {
     ownsPresentationStyle = false;
     presentation = null;
     resumeOnEligiblePlayer = preserveResume;
-    dispatchPlayerResize(document);
+    if (changed) dispatchPlayerResize(document);
     return { result: 'restored' };
   }
 

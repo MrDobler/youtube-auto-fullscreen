@@ -266,6 +266,9 @@ test('hides YouTube recommended-video overlays during presentation', () => {
     'ytp-ce-element',
     'ytp-autonav-endscreen-upnext-container',
     'ytp-autonav-endscreen-countdown-container',
+    'ytp-videowall-still',
+    'ytp-related-on-error',
+    'ytp-new-endscreen-card',
   ].map((className) => {
     const overlay = dom.window.document.createElement('div');
     overlay.className = className;

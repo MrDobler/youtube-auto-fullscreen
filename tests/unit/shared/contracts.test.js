@@ -177,6 +177,35 @@ test('accepts valid document, video, preference and resumable session records', 
   expect(validateSessionRecord(session).ok).toBe(true);
 });
 
+test('accepts only an owned window record that belongs to the session document', () => {
+  const tab = {
+    document: documentIdentity,
+    video: videoIdentity,
+    suppression: null,
+    operations: [],
+    window: {
+      operationId: 'op_window_01',
+      windowId: documentIdentity.windowId,
+      previousState: 'normal',
+      changed: true,
+    },
+  };
+
+  expect(validateTabSession(tab).ok).toBe(true);
+  expect(
+    validateTabSession({
+      ...tab,
+      window: { ...tab.window, windowId: 9 },
+    }).ok,
+  ).toBe(false);
+  expect(
+    validateTabSession({
+      ...tab,
+      window: { ...tab.window, changed: false },
+    }).ok,
+  ).toBe(false);
+});
+
 test.each([
   [validateDocumentIdentity, { ...documentIdentity, navigationGeneration: 0 }],
   [validateVideoIdentity, { ...videoIdentity, videoGeneration: 0 }],

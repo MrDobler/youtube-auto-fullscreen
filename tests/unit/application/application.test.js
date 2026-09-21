@@ -160,6 +160,58 @@ test('runs the complete player-to-window-to-presentation flow and Esc restoratio
   );
 });
 
+test('recovers persisted fullscreen ownership after F5 without entering the window again', async () => {
+  const previousDocument = {
+    ...documentIdentity,
+    documentId: 'doc_before_reload',
+  };
+  const storedSession = {
+    schemaVersion: STORAGE_SCHEMA_VERSION,
+    tabs: {
+      7: {
+        document: previousDocument,
+        video: {
+          document: previousDocument,
+          videoId: 'video_01',
+          videoGeneration: 1,
+        },
+        suppression: null,
+        operations: [],
+        window: {
+          operationId: 'op_before_reload',
+          windowId: 3,
+          previousState: 'normal',
+          changed: true,
+        },
+      },
+    },
+  };
+  const adapters = fakeAdapters({
+    readSession: vi.fn().mockResolvedValue(success(storedSession)),
+    tabContext: vi.fn().mockResolvedValue(
+      success({
+        tabFocused: true,
+        windowFocused: true,
+        windowState: 'fullscreen',
+        fullscreenOwner: 'external',
+      }),
+    ),
+  });
+  const app = application(adapters);
+
+  await app.receiveMessage(playerMessage(), { kind: 'content' });
+
+  expect(app.snapshot().state.runtime['7']).toMatchObject({
+    phase: 'active',
+    ownsWindow: true,
+  });
+  expect(adapters.enterFullscreen).not.toHaveBeenCalled();
+  expect(adapters.sendToDocument).toHaveBeenCalledOnce();
+  expect(adapters.sendToDocument.mock.calls[0][1].type).toBe(
+    MESSAGE_TYPES.PRESENTATION_APPLY,
+  );
+});
+
 test('persists the popup preference before confirming it and restores active windows', async () => {
   const adapters = fakeAdapters();
   const app = application(adapters);

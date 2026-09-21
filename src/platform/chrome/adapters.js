@@ -326,8 +326,8 @@ export function createChromeAdapters(chromeApi) {
     },
 
     /**
-     * Restores only a change made by this adapter in this worker lifetime.
-     * Losing the guard on worker wake is safe: it refuses to change a window.
+     * Restores an extension-owned change. A record hydrated from session state
+     * is accepted after a worker wake only while the window remains fullscreen.
      *
      * @param {unknown} change
      * @returns {Promise<AdapterResult<{ restored: boolean }>>}
@@ -339,12 +339,18 @@ export function createChromeAdapters(chromeApi) {
           'The window restoration record is invalid.',
           'windowChange',
         );
+      if (!change.changed)
+        return failure(
+          'window-not-owned',
+          'The extension did not make this window change.',
+          'windowChange',
+        );
       const owned = ownedWindowChanges.get(change.operationId);
       if (
-        owned === undefined ||
-        owned.windowId !== change.windowId ||
-        owned.previousState !== change.previousState ||
-        owned.changed !== change.changed
+        owned !== undefined &&
+        (owned.windowId !== change.windowId ||
+          owned.previousState !== change.previousState ||
+          owned.changed !== change.changed)
       )
         return failure(
           'window-not-owned',
@@ -352,6 +358,13 @@ export function createChromeAdapters(chromeApi) {
           'windowChange',
         );
       try {
+        const current = await /** @type {Promise<chrome.windows.Window>} */ (
+          /** @type {unknown} */ (chromeApi.windows.get(change.windowId))
+        );
+        if (current.state !== 'fullscreen') {
+          ownedWindowChanges.delete(change.operationId);
+          return success({ restored: false });
+        }
         await /** @type {Promise<chrome.windows.Window>} */ (
           /** @type {unknown} */ (
             chromeApi.windows.update(change.windowId, {

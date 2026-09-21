@@ -81,7 +81,8 @@ const EFFECT_KINDS = new Set([
 /** @typedef {{ schemaVersion: number, enabled: boolean, revision: number }} PreferenceRecord */
 /** @typedef {{ videoId: string, videoGeneration: number }} VideoSuppression */
 /** @typedef {{ operationId: string, kind: string, target: VideoIdentity | null, createdAtEpochMs: number, completedEffects: string[], pendingEffects: string[] }} PendingOperation */
-/** @typedef {{ document: DocumentIdentity, video: VideoIdentity | null, suppression: VideoSuppression | null, operations: PendingOperation[] }} TabSession */
+/** @typedef {{ operationId: string, windowId: number, previousState: 'normal'|'maximized', changed: boolean }} OwnedWindowChange */
+/** @typedef {{ document: DocumentIdentity, video: VideoIdentity | null, suppression: VideoSuppression | null, operations: PendingOperation[], window?: OwnedWindowChange | null }} TabSession */
 /** @typedef {{ schemaVersion: number, tabs: Record<string, TabSession> }} SessionRecord */
 
 /** @param {ContractErrorCode} code @param {string} message @param {string} path @returns {{ ok: false, error: ContractError }} */
@@ -314,7 +315,14 @@ export function validatePendingOperation(value) {
 export function validateTabSession(value) {
   if (
     !isRecord(value) ||
-    !hasExactKeys(value, ['document', 'video', 'suppression', 'operations'])
+    (!hasExactKeys(value, ['document', 'video', 'suppression', 'operations']) &&
+      !hasExactKeys(value, [
+        'document',
+        'video',
+        'suppression',
+        'operations',
+        'window',
+      ]))
   )
     return failure('invalid-state', 'Tab session has an invalid shape.', 'tab');
   const document = validateDocumentIdentity(value.document);
@@ -359,6 +367,32 @@ export function validateTabSession(value) {
   for (const operation of value.operations) {
     const validOperation = validatePendingOperation(operation);
     if (!validOperation.ok) return validOperation;
+  }
+  if ('window' in value && value.window !== null) {
+    if (
+      !isRecord(value.window) ||
+      !hasExactKeys(value.window, [
+        'operationId',
+        'windowId',
+        'previousState',
+        'changed',
+      ]) ||
+      !isIdentifier(value.window.operationId) ||
+      !isNonNegativeSafeInteger(value.window.windowId) ||
+      !isOneOf(new Set(['normal', 'maximized']), value.window.previousState) ||
+      value.window.changed !== true
+    )
+      return failure(
+        'invalid-state',
+        'Owned window record is invalid.',
+        'tab.window',
+      );
+    if (value.window.windowId !== document.value.windowId)
+      return failure(
+        'invalid-state',
+        'Owned window record must belong to the current document window.',
+        'tab.window.windowId',
+      );
   }
   return success(/** @type {TabSession} */ (value));
 }

@@ -142,6 +142,7 @@ function beginEntry(state, tabId, operation) {
         ['window:enter-fullscreen'],
       ),
     ],
+    window: null,
   };
   let next = replaceSessionTab(state, tabId, sessionTab);
   next = replaceRuntimeTab(next, tabId, {
@@ -245,6 +246,7 @@ function reportPlayer(state, event) {
     return { state, effects: [] };
   }
   const previousVideo = tab.video;
+  const previousSession = state.session.tabs[String(event.tabId)];
   const sameVideo =
     previousVideo !== null && previousVideo.videoId === event.videoId;
   const documentChanged =
@@ -270,7 +272,8 @@ function reportPlayer(state, event) {
     document: event.document,
     video: videoIdentity(video),
     suppression,
-    operations: state.session.tabs[String(event.tabId)]?.operations ?? [],
+    operations: previousSession?.operations ?? [],
+    window: previousSession?.window ?? null,
   };
   let next = replaceSessionTab(state, event.tabId, sessionTab);
   next = replaceRuntimeTab(next, event.tabId, {
@@ -278,6 +281,52 @@ function reportPlayer(state, event) {
     video,
     suppressed: suppression !== null,
   });
+  const recoverOwnedPresentation =
+    tab.phase === 'idle' &&
+    !tab.ownsWindow &&
+    tab.context.windowState === 'fullscreen' &&
+    previousSession?.window?.changed === true &&
+    previousSession.window.windowId === event.document.windowId &&
+    previousSession.video?.videoId === event.videoId &&
+    suppression === null;
+  if (recoverOwnedPresentation) {
+    const target = videoIdentity(video);
+    next = replaceSessionTab(next, event.tabId, {
+      ...next.session.tabs[String(event.tabId)],
+      operations: [
+        pendingOperation(
+          event.operation,
+          'presentation:apply',
+          target,
+          ['storage:write-session'],
+          ['content:send'],
+        ),
+      ],
+    });
+    next = replaceRuntimeTab(next, event.tabId, {
+      ...runtimeTab(next, event.tabId),
+      phase: 'presenting',
+      operation: event.operation,
+      ownsWindow: true,
+    });
+    return {
+      state: next,
+      effects: [
+        sessionEffect(next),
+        {
+          kind: 'content:send',
+          operationId: event.operation.operationId,
+          message: {
+            protocolVersion: PROTOCOL_VERSION,
+            type: MESSAGE_TYPES.PRESENTATION_APPLY,
+            requestId: event.operation.requestId,
+            operationId: event.operation.operationId,
+            payload: { target },
+          },
+        },
+      ],
+    };
+  }
   if (
     tab.phase === 'active' &&
     tab.ownsWindow &&
@@ -359,7 +408,7 @@ function exitRequested(state, event) {
   return exit;
 }
 
-/** @param {DomainState} state @param {{ tabId: number, operationId: string, kind: string }} event */
+/** @param {DomainState} state @param {{ tabId: number, operationId: string, kind: string, windowChange?: import('../shared/contracts.js').OwnedWindowChange }} event */
 function operationSucceeded(state, event) {
   const tab = runtimeTab(state, event.tabId);
   if (tab.operation?.operationId !== event.operationId)
@@ -381,6 +430,7 @@ function operationSucceeded(state, event) {
           ['content:send'],
         ),
       ],
+      window: event.windowChange?.changed === true ? event.windowChange : null,
     };
     let next = replaceSessionTab(state, event.tabId, sessionTab);
     next = replaceRuntimeTab(next, event.tabId, {
@@ -408,6 +458,10 @@ function operationSucceeded(state, event) {
   }
   if (tab.phase === 'exiting-window' && event.kind === 'window:restore') {
     let next = removeSessionOperation(state, event.tabId);
+    next = replaceSessionTab(next, event.tabId, {
+      ...next.session.tabs[String(event.tabId)],
+      window: null,
+    });
     next = replaceRuntimeTab(next, event.tabId, {
       ...tab,
       phase: 'idle',
