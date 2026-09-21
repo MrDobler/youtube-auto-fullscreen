@@ -12,7 +12,7 @@ let mountPopup;
 const markup = `
   <main aria-busy="true" aria-labelledby="popup-title">
     <h1 id="popup-title">YouTube Auto Fullscreen</h1>
-    <form><fieldset><legend id="preference-label">Tela cheia automática</legend>
+    <form><fieldset><legend id="preference-label">Automatic fullscreen</legend>
       <div><input id="enabled" type="checkbox" aria-describedby="status" disabled>
         <label for="enabled"><span id="toggle-label"></span><span id="toggle-state"></span></label>
       </div>
@@ -104,12 +104,11 @@ test('loads and presents the worker-confirmed global preference', async () => {
     document,
     transport: { send },
     createRequestId: ids(),
-    locale: 'pt-BR',
   });
   const ui = elements();
 
   expect(ui.toggle.disabled).toBe(true);
-  expect(ui.status.textContent).toContain('Carregando');
+  expect(ui.status.textContent).toContain('Loading');
   await popup.ready;
   expect(send).toHaveBeenCalledWith({
     protocolVersion: PROTOCOL_VERSION,
@@ -119,7 +118,7 @@ test('loads and presents the worker-confirmed global preference', async () => {
   });
   expect(ui.toggle.checked).toBe(true);
   expect(ui.toggle.disabled).toBe(false);
-  expect(ui.status.textContent).toBe('Ativado');
+  expect(ui.status.textContent).toBe('Enabled');
   expect(ui.main.getAttribute('aria-busy')).toBe('false');
 });
 
@@ -259,7 +258,7 @@ test('reloads the persisted preference when the popup is opened again', async ()
   expect(elements().status.textContent).toBe('Disabled');
 });
 
-test('uses English messages when requested and removes its listener on dispose', async () => {
+test('uses English messages and removes its listener on dispose', async () => {
   const send = vi.fn((message) =>
     Promise.resolve(result(message.requestId, true)),
   );
@@ -267,7 +266,6 @@ test('uses English messages when requested and removes its listener on dispose',
     document,
     transport: { send },
     createRequestId: ids(),
-    locale: 'en-US',
   });
   await popup.ready;
   const ui = elements();
@@ -312,7 +310,6 @@ test('mounts through Chrome on the real popup entry point', async () => {
   );
   vi.stubGlobal('chrome', {
     runtime: { sendMessage },
-    i18n: { getUILanguage: () => 'en-US' },
   });
   vi.stubGlobal('crypto', { randomUUID: () => 'popup_uuid' });
   vi.resetModules();

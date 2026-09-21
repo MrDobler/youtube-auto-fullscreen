@@ -5,4 +5,5 @@ test-results
 playwright-report
 package-lock.json
 .agents
-docs/third-party/modern-web-guidance-LICENSE
+docs
+AGENTS.md

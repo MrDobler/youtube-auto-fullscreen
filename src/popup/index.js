@@ -6,40 +6,21 @@ import {
 } from '../shared/contracts.js';
 
 const COPY = Object.freeze({
-  en: {
-    title: 'YouTube Auto Fullscreen',
-    preferenceLabel: 'Automatic fullscreen',
-    toggleLabel: 'Enable for videos and live streams',
-    enabled: 'Enabled',
-    disabled: 'Disabled',
-    loading: 'Loading preference…',
-    saving: 'Saving preference…',
-    loadError:
-      'Could not load the preference. Reopen the extension to try again.',
-    saveError: 'The change was not confirmed. Try again.',
-  },
-  'pt-BR': {
-    title: 'YouTube Auto Fullscreen',
-    preferenceLabel: 'Tela cheia automática',
-    toggleLabel: 'Ativar para vídeos e lives',
-    enabled: 'Ativado',
-    disabled: 'Desativado',
-    loading: 'Carregando preferência…',
-    saving: 'Salvando preferência…',
-    loadError:
-      'Não foi possível carregar a preferência. Reabra a extensão para tentar novamente.',
-    saveError: 'A alteração não foi confirmada. Tente novamente.',
-  },
+  title: 'YouTube Auto Fullscreen',
+  preferenceLabel: 'Automatic fullscreen',
+  toggleLabel: 'Enable for videos and live streams',
+  enabled: 'Enabled',
+  disabled: 'Disabled',
+  loading: 'Loading preference…',
+  saving: 'Saving preference…',
+  loadError:
+    'Could not load the preference. Reopen the extension to try again.',
+  saveError: 'The change was not confirmed. Try again.',
 });
 
 /** @typedef {'loading'|'ready'|'saving'|'error'} PopupPhase */
 /** @typedef {{ send: (message: Record<string, unknown>) => Promise<unknown> }} PreferenceTransport */
 /** @typedef {{ toggle: HTMLInputElement, title: HTMLElement, preferenceLabel: HTMLElement, toggleLabel: HTMLElement, toggleState: HTMLElement, status: HTMLElement, main: HTMLElement }} PopupElements */
-
-/** @param {string | undefined} locale */
-function copyFor(locale) {
-  return locale?.toLowerCase().startsWith('pt') ? COPY['pt-BR'] : COPY.en;
-}
 
 /** @param {Document} document @returns {PopupElements | null} */
 function popupElements(document) {
@@ -109,7 +90,7 @@ export function createChromePreferenceTransport(chromeApi) {
  * Mounts the preference UI against an injected worker transport. The worker
  * owns persistence and operations so a popup closing cannot cancel a change.
  *
- * @param {{ document: Document, transport: PreferenceTransport, createRequestId: () => string, locale?: string }} dependencies
+ * @param {{ document: Document, transport: PreferenceTransport, createRequestId: () => string }} dependencies
  */
 export function mountPopup(dependencies) {
   const elements = popupElements(dependencies.document);
@@ -120,7 +101,7 @@ export function mountPopup(dependencies) {
       dispose: () => {},
     });
   const ui = elements;
-  const copy = copyFor(dependencies.locale);
+  const copy = COPY;
   ui.title.textContent = copy.title;
   ui.preferenceLabel.textContent = copy.preferenceLabel;
   ui.toggleLabel.textContent = copy.toggleLabel;
@@ -236,7 +217,6 @@ if (chromeApi !== undefined) {
     document,
     transport: createChromePreferenceTransport(chromeApi),
     createRequestId: defaultRequestId,
-    locale: chromeApi.i18n.getUILanguage(),
   });
   void controller.ready;
 }

@@ -18,7 +18,7 @@ test('MV3 artifact has consistent versions, least access and existing local reso
   const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
   assert.equal(manifest.manifest_version, 3);
   assert.equal(manifest.version, pkg.version);
-  assert.equal(manifest.default_locale, 'en');
+  assert.equal(manifest.default_locale, undefined);
   assert.equal(manifest.background.type, 'module');
   assert.deepEqual(manifest.permissions, ['storage']);
   assert.equal(manifest.host_permissions, undefined);
@@ -40,7 +40,7 @@ test('MV3 artifact has consistent versions, least access and existing local reso
   );
   const dom = new JSDOM(html);
   const document = dom.window.document;
-  assert.equal(document.documentElement.lang, 'pt-BR');
+  assert.equal(document.documentElement.lang, 'en');
   assert.equal(document.querySelectorAll('h1').length, 1);
   for (const element of document.querySelectorAll(
     'script, link[rel="stylesheet"]',
@@ -82,8 +82,6 @@ async function digest() {
 test('clean repeated builds produce identical runtime-only artifacts', async () => {
   const first = await digest();
   assert.deepEqual(Object.keys(first).sort(), [
-    '_locales/en/messages.json',
-    '_locales/pt_BR/messages.json',
     'background/index.js',
     'content/index.js',
     'manifest.json',

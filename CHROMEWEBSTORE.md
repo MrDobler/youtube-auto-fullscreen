@@ -1,31 +1,32 @@
-# Chrome Web Store — preparação
+# Chrome Web Store — preparation
 
-Atualizado em 21/09/2026. Estado: desenvolvimento S07; não pronto para submissão.
+Updated on 2026-09-21. Status: local development; not ready for submission.
 
 ## Listing
 
-Nome: YouTube Auto Fullscreen. Versão local: 0.1.2. Descrição atual: base de desenvolvimento da extensão. Propósito planejado: abrir vídeos do YouTube automaticamente em tela cheia, respeitando saída manual e preferência global. A S07 integra o fluxo de vídeo direto, Esc e restauração de mudanças próprias. Descrição comercial, categoria, ícones e screenshots serão preparados após implementação e validação.
+Name: YouTube Auto Fullscreen. Local version: 0.1.3. Current description: automatically opens eligible YouTube videos and live streams in fullscreen while respecting manual exit and the global preference. Store copy, category, icons, and screenshots remain to be prepared after manual platform validation.
 
-## Permissões e acesso
+## Permissions and access
 
-É solicitada somente a permissão `storage`, para manter no navegador a preferência global e o estado temporário recuperável das operações. Content scripts limitados a `https://youtube.com/*` e `https://www.youtube.com/*`. Não há `host_permissions`, `externally_connectable` ou recursos expostos por `web_accessible_resources`.
+Only the `storage` permission is requested, to retain the global preference and recoverable temporary operation state in the browser. Content scripts are limited to `https://youtube.com/*` and `https://www.youtube.com/*`. There are no `host_permissions`, `externally_connectable`, or `web_accessible_resources`.
 
-O content script observa o player elegível e aplica estilos reversíveis após confirmação do worker. O popup envia pedidos versionados de leitura e alteração da preferência, sem acessar armazenamento diretamente. O worker grava apenas esses dados locais e pode solicitar tela cheia da janela ativa; não há transmissão de dados, analytics, servidor ou execução remota.
+The content script detects an eligible player and applies reversible presentation styles after worker confirmation. The popup reads and changes the preference without accessing storage directly. The worker stores only local data and can request fullscreen for the active window. The extension has no data transmission, analytics, server, or remote code.
 
-O runner E2E atual consegue abrir a página empacotada do popup para validar a interface, mas não reproduz o remetente de um popup aberto pela ação do navegador; a troca real de preferência permanece coberta por testes unitários do contrato e requer aceitação manual no Chrome.
+The current E2E runner opens the packaged popup page to validate its interface, but does not reproduce the sender from a browser-action popup. Changing the preference is covered by contract unit tests and still requires manual Chrome acceptance.
 
-## Distribuição e privacidade
+## Distribution and privacy
 
-Distribuição local para desenvolvimento. Política de privacidade definitiva, URL pública, nome do publicador, contato, regiões e visibilidade: pendentes. Não inferir dados pessoais. Sem coleta, analytics, servidor ou execução remota na implementação atual.
+Distribution is local for development. The final privacy policy, public URL, publisher name, contact information, regions, and visibility are pending. The implementation does not infer personal data and has no collection, analytics, server, or remote code.
 
-## Histórico
+## Version history
 
-| Versão | Entrega                                                      | Situação           |
-| ------ | ------------------------------------------------------------ | ------------------ |
-| 0.1.2  | Recálculo imediato do player para uma transição mais fluida  | Local, não enviada |
-| 0.1.1  | Correções de apresentação fullscreen e retomada entre vídeos | Local, não enviada |
-| 0.1.0  | Fundação, preferência, fluxo integrado e E2E controlado      | Local, não enviada |
+| Version | Delivery                                                     | Status               |
+| ------- | ------------------------------------------------------------ | -------------------- |
+| 0.1.3   | English-only popup and removed unused locale assets.         | Local, not submitted |
+| 0.1.2   | Immediate player recalculation for smoother presentation.    | Local, not submitted |
+| 0.1.1   | Fullscreen presentation and cross-video resumption fixes.    | Local, not submitted |
+| 0.1.0   | Foundation, preference, integrated flow, and controlled E2E. | Local, not submitted |
 
-## Pendências
+## Pending work
 
-Funcionalidades do produto, aceitação Mac/Windows, assets, licença do código próprio e textos finais. Não houve submissão ou revisão da loja.
+Manual macOS/Windows acceptance, assets, the project license, and final store materials remain pending. There has been no store submission or review.

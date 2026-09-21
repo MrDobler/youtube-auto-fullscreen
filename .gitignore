@@ -3,6 +3,9 @@ dist/
 coverage/
 test-results/
 playwright-report/
+.agents/
+docs/
+AGENTS.md
 .DS_Store
 *.log
 .env
