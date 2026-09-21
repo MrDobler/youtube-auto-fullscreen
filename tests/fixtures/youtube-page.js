@@ -138,12 +138,20 @@ export function youtubeFixturePage(scenario) {
           record('video-advanced:' + videoId);
         }
 
+        function removePlayer() {
+          host.replaceChildren();
+          window.history.pushState({}, '', '/');
+          document.dispatchEvent(new Event('yt-navigate-finish'));
+          record('player-removed');
+        }
+
         document.querySelector('#replace-player').addEventListener('click', replacePlayer);
         document.querySelector('#advance-video').addEventListener('click', () => advanceVideo());
         window.__ytafFixture = Object.freeze({
           advanceVideo,
           history: () => [...events],
           player: () => document.querySelector('#movie_player'),
+          removePlayer,
           replacePlayer,
           status: () => status.textContent,
         });

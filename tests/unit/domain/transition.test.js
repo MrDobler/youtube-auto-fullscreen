@@ -256,6 +256,35 @@ test('sequence: a real video change releases Esc and starts a new generation', (
   expect(changed.state.runtime['17'].phase).toBe('restoring');
 });
 
+test('reapplies the presentation when a new video arrives after the old player was removed', () => {
+  const active = activeState().state;
+  const replacement = transition(
+    active,
+    player({
+      videoId: 'replacement_video',
+      observationId: 2,
+      operation: operation('present_replacement'),
+    }),
+  );
+  expect(replacement.state.runtime['17']).toMatchObject({
+    phase: 'presenting',
+    ownsWindow: true,
+    video: { videoId: 'replacement_video', videoGeneration: 2 },
+  });
+  expect(replacement.effects.map((effect) => effect.kind)).toEqual([
+    'storage:write-session',
+    'content:send',
+  ]);
+  expect(replacement.effects[1]).toMatchObject({
+    operationId: 'present_replacement',
+    message: {
+      type: 'presentation:apply',
+      payload: { target: { videoId: 'replacement_video' } },
+    },
+  });
+  expectValidEffects(replacement.effects);
+});
+
 test('ignores stale success, stale generation and repeated reports without effects', () => {
   const entering = transition(focusedState(), player());
   expect(

@@ -234,6 +234,9 @@ export function createYouTubePlayerController(dependencies) {
   let mounted = false;
   let disposed = false;
   let observationId = 0;
+  let resumeOnEligiblePlayer = false;
+  /** @type {ReturnType<typeof globalThis.setInterval> | null} */
+  let reconciliationTimer = null;
 
   /** @param {SnapshotReason} reason */
   function refresh(reason) {
@@ -244,7 +247,7 @@ export function createYouTubePlayerController(dependencies) {
       resolved.snapshot.mediaKind !== 'live'
     ) {
       observeVideo(null);
-      if (presentation !== null) restore();
+      if (presentation !== null) restore(true);
       return resolved.snapshot;
     }
     if (
@@ -253,14 +256,20 @@ export function createYouTubePlayerController(dependencies) {
       resolved.video === null
     ) {
       observeVideo(null);
-      if (presentation !== null) restore();
+      if (presentation !== null) restore(true);
       return resolved.snapshot;
     }
     observeVideo(resolved.video);
+    if (resumeOnEligiblePlayer) {
+      resumeOnEligiblePlayer = false;
+      apply(resolved.snapshot.videoId);
+    }
     if (
       lastReport === null ||
       lastReport.videoId !== resolved.snapshot.videoId ||
-      lastReport.player !== resolved.player
+      lastReport.player !== resolved.player ||
+      reason === 'url-change' ||
+      reason === 'player-replaced'
     ) {
       observationId += 1;
       lastReport = {
@@ -425,8 +434,8 @@ export function createYouTubePlayerController(dependencies) {
     }
   }
 
-  /** @returns {PresentationResult} */
-  function restore() {
+  /** @param {boolean} [preserveResume] @returns {PresentationResult} */
+  function restore(preserveResume = false) {
     for (const change of classChanges) {
       if (!change.existed) change.element.classList.remove(change.className);
     }
@@ -436,6 +445,7 @@ export function createYouTubePlayerController(dependencies) {
     presentationStyle = null;
     ownsPresentationStyle = false;
     presentation = null;
+    resumeOnEligiblePlayer = preserveResume;
     return { result: 'restored' };
   }
 
@@ -453,6 +463,9 @@ export function createYouTubePlayerController(dependencies) {
         subtree: true,
       });
     }
+    reconciliationTimer = globalThis.setInterval(() => {
+      if (!disposed) refresh('state-change');
+    }, 1000);
     return refresh('initial');
   }
 
@@ -462,6 +475,9 @@ export function createYouTubePlayerController(dependencies) {
     observer?.disconnect();
     observer?.takeRecords();
     observer = null;
+    if (reconciliationTimer !== null)
+      globalThis.clearInterval(reconciliationTimer);
+    reconciliationTimer = null;
     observeVideo(null);
     document.removeEventListener('keydown', handleKeyboard, true);
     document.removeEventListener('click', handleClick, true);

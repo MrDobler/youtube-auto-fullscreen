@@ -275,6 +275,43 @@ function reportPlayer(state, event) {
     video,
     suppressed: suppression !== null,
   });
+  if (!sameVideo && tab.phase === 'active' && tab.ownsWindow) {
+    const target = videoIdentity(video);
+    next = replaceSessionTab(next, event.tabId, {
+      ...next.session.tabs[String(event.tabId)],
+      operations: [
+        pendingOperation(
+          event.operation,
+          'presentation:apply',
+          target,
+          ['storage:write-session'],
+          ['content:send'],
+        ),
+      ],
+    });
+    next = replaceRuntimeTab(next, event.tabId, {
+      ...runtimeTab(next, event.tabId),
+      phase: 'presenting',
+      operation: event.operation,
+    });
+    return {
+      state: next,
+      effects: [
+        sessionEffect(next),
+        {
+          kind: 'content:send',
+          operationId: event.operation.operationId,
+          message: {
+            protocolVersion: PROTOCOL_VERSION,
+            type: MESSAGE_TYPES.PRESENTATION_APPLY,
+            requestId: event.operation.requestId,
+            operationId: event.operation.operationId,
+            payload: { target },
+          },
+        },
+      ],
+    };
+  }
   if (!sameVideo && tab.phase === 'entering') {
     next = removeSessionOperation(next, event.tabId);
     next = replaceRuntimeTab(next, event.tabId, {

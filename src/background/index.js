@@ -20,7 +20,7 @@ chromeApi.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   void application.receiveMessage(message, sender).then(
     (response) => {
-      if (response !== null) sendResponse(response);
+      sendResponse(response ?? { ok: true });
     },
     () => {},
   );

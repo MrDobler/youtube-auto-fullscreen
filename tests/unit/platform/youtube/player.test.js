@@ -294,6 +294,53 @@ test('fails safely for a stale target and restores presentation after context in
   );
 });
 
+test('resumes the presentation when an eligible player returns after an in-page transition', async () => {
+  const dom = page();
+  const controller = createYouTubePlayerController({
+    document: dom.window.document,
+    MutationObserver: dom.window.MutationObserver,
+  });
+  controller.mount();
+  controller.apply(videoIdentity());
+
+  dom.window.document.querySelector('#movie_player').remove();
+  await flushMutations();
+  expect(dom.window.document.documentElement.classList).not.toContain(
+    'ytaf-presentation-root',
+  );
+
+  dom.reconfigure({ url: 'https://www.youtube.com/watch?v=next_video' });
+  const player = dom.window.document.createElement('div');
+  player.id = 'movie_player';
+  player.dataset.videoId = 'next_video';
+  player.innerHTML =
+    '<div class="html5-video-container"><video class="html5-main-video" data-video-id="next_video"></video></div>';
+  dom.window.document.querySelector('main').append(player);
+  dom.window.document.dispatchEvent(new dom.window.Event('yt-navigate-finish'));
+
+  expect(player.classList).toContain('ytaf-presentation-player');
+  expect(dom.window.document.documentElement.classList).toContain(
+    'ytaf-presentation-root',
+  );
+});
+
+test('clears the periodic reconciler on disposal', () => {
+  const dom = page();
+  const setInterval = vi.fn(() => 41);
+  const clearInterval = vi.fn();
+  vi.stubGlobal('setInterval', setInterval);
+  vi.stubGlobal('clearInterval', clearInterval);
+  const controller = createYouTubePlayerController({
+    document: dom.window.document,
+    MutationObserver: dom.window.MutationObserver,
+  });
+
+  controller.mount();
+  controller.dispose();
+  expect(setInterval).toHaveBeenCalledOnce();
+  expect(clearInterval).toHaveBeenCalledWith(41);
+});
+
 test('reports Escape, F and the player fullscreen button only in active automatic mode', () => {
   const dom = page();
   const exits = vi.fn();
