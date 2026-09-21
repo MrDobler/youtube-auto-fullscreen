@@ -257,6 +257,32 @@ test('applies and restores only its own presentation classes and stylesheet', ()
   expect(resize).toHaveBeenCalledTimes(2);
 });
 
+test('hides YouTube recommended-video overlays during presentation', () => {
+  const dom = page();
+  const player = dom.window.document.querySelector('#movie_player');
+  const overlays = [
+    'ytp-pause-overlay',
+    'ytp-endscreen-content',
+    'ytp-ce-element',
+    'ytp-autonav-endscreen-upnext-container',
+    'ytp-autonav-endscreen-countdown-container',
+  ].map((className) => {
+    const overlay = dom.window.document.createElement('div');
+    overlay.className = className;
+    player.append(overlay);
+    return overlay;
+  });
+  const controller = createYouTubePlayerController({
+    document: dom.window.document,
+    MutationObserver: dom.window.MutationObserver,
+  });
+  controller.mount();
+
+  expect(controller.apply(videoIdentity())).toEqual({ result: 'applied' });
+  for (const overlay of overlays)
+    expect(dom.window.getComputedStyle(overlay).visibility).toBe('hidden');
+});
+
 test('preserves a class and style that belonged to the site before apply', () => {
   const dom = page();
   const player = dom.window.document.querySelector('#movie_player');

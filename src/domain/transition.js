@@ -247,6 +247,9 @@ function reportPlayer(state, event) {
   const previousVideo = tab.video;
   const sameVideo =
     previousVideo !== null && previousVideo.videoId === event.videoId;
+  const documentChanged =
+    previousVideo !== null &&
+    previousVideo.document.documentId !== event.document.documentId;
   const video = {
     document: event.document,
     videoId: event.videoId,
@@ -275,7 +278,11 @@ function reportPlayer(state, event) {
     video,
     suppressed: suppression !== null,
   });
-  if (!sameVideo && tab.phase === 'active' && tab.ownsWindow) {
+  if (
+    tab.phase === 'active' &&
+    tab.ownsWindow &&
+    (!sameVideo || documentChanged)
+  ) {
     const target = videoIdentity(video);
     next = replaceSessionTab(next, event.tabId, {
       ...next.session.tabs[String(event.tabId)],

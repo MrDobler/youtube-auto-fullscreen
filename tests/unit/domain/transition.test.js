@@ -285,6 +285,44 @@ test('reapplies the presentation when a new video arrives after the old player w
   expectValidEffects(replacement.effects);
 });
 
+test('reapplies the presentation after a document reload of the same video', () => {
+  const active = activeState().state;
+  const reloaded = transition(
+    active,
+    player({
+      document: {
+        ...documentIdentity,
+        documentId: 'doc_reloaded',
+        navigationGeneration: 13,
+      },
+      observationId: 1,
+      operation: operation('present_reloaded'),
+    }),
+  );
+
+  expect(reloaded.state.runtime['17']).toMatchObject({
+    phase: 'presenting',
+    ownsWindow: true,
+    video: {
+      videoId: 'dQw4w9WgXcQ',
+      videoGeneration: 1,
+      document: { documentId: 'doc_reloaded' },
+    },
+  });
+  expect(reloaded.effects.map((effect) => effect.kind)).toEqual([
+    'storage:write-session',
+    'content:send',
+  ]);
+  expect(reloaded.effects[1]).toMatchObject({
+    operationId: 'present_reloaded',
+    message: {
+      type: 'presentation:apply',
+      payload: { target: { videoId: 'dQw4w9WgXcQ' } },
+    },
+  });
+  expectValidEffects(reloaded.effects);
+});
+
 test('ignores stale success, stale generation and repeated reports without effects', () => {
   const entering = transition(focusedState(), player());
   expect(

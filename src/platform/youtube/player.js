@@ -29,6 +29,13 @@ html.${ROOT_CLASS} .${ANCESTOR_CLASS} {
 }
 html.${ROOT_CLASS} .${PLAYER_CLASS},
 html.${ROOT_CLASS} .${PLAYER_CLASS} * { visibility: visible !important; }
+html.${ROOT_CLASS} .${PLAYER_CLASS} :is(
+  .ytp-pause-overlay,
+  .ytp-endscreen-content,
+  .ytp-ce-element,
+  .ytp-autonav-endscreen-upnext-container,
+  .ytp-autonav-endscreen-countdown-container
+) { visibility: hidden !important; }
 html.${ROOT_CLASS} .${PLAYER_CLASS} {
   position: fixed !important;
   inset: 0 !important;

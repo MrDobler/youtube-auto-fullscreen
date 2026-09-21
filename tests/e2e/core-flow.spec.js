@@ -1,6 +1,22 @@
 import { expect, test } from './harness/extension.js';
 
 test.describe('core automatic fullscreen flow', () => {
+  test('hides recommendations and reapplies presentation after a page reload', async ({
+    extension,
+  }) => {
+    const page = await extension.openYouTube('direct');
+    await extension.waitForPlayer(page, 'direct_video');
+    await expect(page.locator('.ytp-pause-overlay')).toBeHidden();
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await extension.waitForPlayer(page, 'direct_video');
+    await expect(page.locator('#movie_player')).toHaveClass(
+      /ytaf-presentation-player/,
+    );
+    await expect(page.locator('.ytp-pause-overlay')).toBeHidden();
+    expect(extension.unexpectedRequests()).toEqual([]);
+  });
+
   test('keeps the presentation when YouTube replaces its player in the same document', async ({
     extension,
   }) => {

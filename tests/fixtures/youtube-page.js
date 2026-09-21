@@ -119,7 +119,10 @@ export function youtubeFixturePage(scenario) {
           fullscreen.className = 'ytp-fullscreen-button';
           fullscreen.type = 'button';
           fullscreen.textContent = 'Fullscreen';
-          player.append(video, fullscreen);
+          const recommendations = document.createElement('div');
+          recommendations.className = 'ytp-pause-overlay';
+          recommendations.textContent = 'Recommended videos';
+          player.append(video, fullscreen, recommendations);
           host.append(player);
           createLocalMedia(video);
           record('player-mounted:' + videoId);
