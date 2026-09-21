@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YouTube Auto Fullscreen",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "default_locale": "en",
   "description": "Base de desenvolvimento da extensão YouTube Auto Fullscreen.",
   "minimum_chrome_version": "120",

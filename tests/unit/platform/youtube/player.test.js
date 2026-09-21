@@ -211,6 +211,8 @@ test('reports a real video URL change through the YouTube navigation event', () 
 
 test('applies and restores only its own presentation classes and stylesheet', () => {
   const dom = page();
+  const resize = vi.fn();
+  dom.window.addEventListener('resize', resize);
   const controller = createYouTubePlayerController({
     document: dom.window.document,
     MutationObserver: dom.window.MutationObserver,
@@ -238,6 +240,7 @@ test('applies and restores only its own presentation classes and stylesheet', ()
     ),
   ).toHaveLength(1);
   expect(dom.window.document.head.textContent).toContain('object-fit: contain');
+  expect(resize).toHaveBeenCalledOnce();
 
   expect(controller.restore()).toEqual({ result: 'restored' });
   expect(controller.restore()).toEqual({ result: 'restored' });
@@ -251,6 +254,7 @@ test('applies and restores only its own presentation classes and stylesheet', ()
   expect(video.classList).not.toContain('ytaf-presentation-video');
   expect(dom.window.document.querySelector(STYLE_SELECTOR)).toBeNull();
   expect(dom.window.document.activeElement).toBe(search);
+  expect(resize).toHaveBeenCalledTimes(2);
 });
 
 test('preserves a class and style that belonged to the site before apply', () => {

@@ -193,6 +193,21 @@ function isPlayerContainer(node) {
   );
 }
 
+/**
+ * Makes YouTube recalculate its player after its containing geometry changes.
+ * The presentation classes move that player from the page layout to the
+ * viewport, which does not always produce a native window resize event.
+ *
+ * @param {Document} document
+ */
+function dispatchPlayerResize(document) {
+  const view = document.defaultView;
+  if (view === null) return;
+  const event = document.createEvent('Event');
+  event.initEvent('resize', false, false);
+  view.dispatchEvent(event);
+}
+
 /** @param {MutationRecord[]} records */
 function mutationsMayChangePlayer(records) {
   return records.some(
@@ -427,6 +442,7 @@ export function createYouTubePlayerController(dependencies) {
         player: resolved.player,
         video: resolved.video,
       };
+      dispatchPlayerResize(document);
       return { result: 'applied' };
     } catch {
       restore();
@@ -446,6 +462,7 @@ export function createYouTubePlayerController(dependencies) {
     ownsPresentationStyle = false;
     presentation = null;
     resumeOnEligiblePlayer = preserveResume;
+    dispatchPlayerResize(document);
     return { result: 'restored' };
   }
 
